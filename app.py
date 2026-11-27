@@ -28,18 +28,38 @@ with tab1:
     months = sorted(d.month.unique())
     sel = st.select_slider("Month", options=months, value=months[-1], format_func=lambda x: pd.Timestamp(x).strftime("%b %Y"))
     m = d[d.month == sel].set_index("district")
-    geo = GEO / "lka_districts.geojson"
+    c1, c2 = st.columns([3, 1])
+    pick_d = c2.selectbox("Select district", sorted(m.index), index=sorted(m.index).index("Colombo"))
+    show_pd = c2.checkbox("Show 160 polling divisions (indicative positions)", value=True)
+    geo = GEO / "lka_districts_geoboundaries.geojson"
     if geo.exists():
+        from config import KEY2NAME, norm_key
+        from geo import load_districts, polling_division_points, POLLING_DIVISIONS
         gj = json.loads(geo.read_text())
-        fig = px.choropleth_mapbox(m.reset_index(), geojson=gj, locations="district", featureidkey="properties.shapeName",
-                                   color=metric, color_continuous_scale="YlOrRd", mapbox_style="carto-positron",
-                                   zoom=6.3, center={"lat": 7.8, "lon": 80.7})
+        for f in gj["features"]:   # id = project district name, e.g. "Colombo District" -> "Colombo"
+            f["id"] = KEY2NAME[norm_key(f["properties"]["shapeName"].replace(" District", ""))]
+        fig = px.choropleth_mapbox(m.reset_index(), geojson=gj, locations="district", color=metric,
+                                   hover_name="district", hover_data={"cases": True, "incidence_per_100k": ":.1f"},
+                                   color_continuous_scale="YlOrRd", mapbox_style="carto-positron",
+                                   zoom=6.3, center={"lat": 7.8, "lon": 80.7}, opacity=0.85)
+        sel_gj = {"type": "FeatureCollection", "features": [f for f in gj["features"] if f["id"] == pick_d]}
+        fig.update_layout(mapbox_layers=[{"source": sel_gj, "type": "line", "color": "#2563eb", "line": {"width": 4}}])
+        if show_pd:
+            P = pd.DataFrame(polling_division_points(load_districts()), columns=["district", "pd", "lon", "lat"])
+            P["label"] = P.district + " polling division " + P.pd.astype(str) + " (case data not yet published)"
+            fig.add_scattermapbox(lat=P.lat, lon=P.lon, mode="markers", text=P.label, hoverinfo="text",
+                                  marker=dict(size=6, color="#111827"), name="Polling divisions (160)")
+        r = m.loc[pick_d]
+        c2.metric("Cases", f"{int(r.cases):,}"); c2.metric("Incidence /100k", f"{r.incidence_per_100k:.1f}")
+        c2.metric("Polling divisions", POLLING_DIVISIONS[pick_d])
+        c2.caption("Dengue cases are published by district only, so polling-division points carry no values yet.")
     else:
         mm = m.join(coords); st.info("No boundary file at data/geo/lka_districts.geojson - showing district centroids.")
         fig = px.scatter_mapbox(mm.reset_index(), lat="lat", lon="lon", size=mm[metric].clip(lower=0.1), color=metric,
                                 hover_name="district", color_continuous_scale="YlOrRd", size_max=40,
                                 mapbox_style="carto-positron", zoom=6.3, center={"lat": 7.8, "lon": 80.7})
-    fig.update_layout(height=620, margin=dict(l=0, r=0, t=0, b=0)); st.plotly_chart(fig, use_container_width=True)
+    fig.update_layout(height=620, margin=dict(l=0, r=0, t=0, b=0), showlegend=False)
+    c1.plotly_chart(fig, use_container_width=True)
 
 with tab2:
     opts = ["NATIONAL"] + sorted(d.district.unique()); pick = st.selectbox("Area", opts)

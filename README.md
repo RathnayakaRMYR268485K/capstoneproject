@@ -1,8 +1,6 @@
 # Dengue Surveillance, Geospatial Risk Analysis & Predictive Dashboard - Sri Lanka
 Capstone (268485K, R. M. Y. R. Rathnayaka) - **Milestone 2: Technical Checkpoint**
 
-Milestone 2 report: see `docs/` and the results in `outputs/` (real data, Dec 2021 - Nov 2025).
-
 ## Quick start
 ```bash
 pip install -r requirements.txt
@@ -23,7 +21,10 @@ The pipeline automatically keeps the **latest 48 complete months** available in 
 | `src/eda.py` | EDA figures + summary tables |
 | `src/clustering.py` | K-means (elbow + silhouette) |
 | `src/forecast.py` | Seasonal-naive baseline, Random Forest (improved), optional SARIMA, rolling-origin back-test, 80% intervals |
-| `app.py` | Streamlit dashboard (risk map, trends, clusters, forecasts) |
+| `src/geo.py` | District boundaries + 160 polling-division points (indicative positions) |
+| `src/dashboard_mockup.py` | Static dashboard mock-up -> `outputs/figures/08_dashboard_mockup.png` |
+| `data/geo/lka_districts_geoboundaries.geojson` | District boundaries (geoBoundaries LKA ADM2, CC BY 4.0) |
+| `app.py` | Streamlit dashboard (district risk map with selection + polling divisions, trends, clusters, forecasts) |
 | `docs/architecture.{png,svg,dot}` | System architecture diagram |
 | `docs/Milestone2_Report.md`, `docs/demo_video_script.md` | Report skeleton and 6-minute demo script |
 

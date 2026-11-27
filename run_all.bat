@@ -5,4 +5,5 @@ python preprocess.py || exit /b 1
 python eda.py || exit /b 1
 python clustering.py || exit /b 1
 python forecast.py || exit /b 1
+python dashboard_mockup.py || exit /b 1
 echo Done. Launch dashboard:  cd .. ^&^& streamlit run app.py
