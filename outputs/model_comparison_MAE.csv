@@ -1,0 +1,9 @@
+level,horizon,random_forest,seasonal_naive,rf_vs_naive_MAE_reduction_pct
+district,1,77.34,134.67,42.57
+district,3,103.6,115.37,10.2
+district,6,100.75,118.24,14.79
+district,12,125.2,110.0,-13.81
+national,1,1589.64,2807.92,43.39
+national,3,1849.29,2360.59,21.66
+national,6,1789.57,2492.58,28.2
+national,12,2443.34,2305.0,-6.0
